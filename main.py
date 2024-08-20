@@ -40,15 +40,17 @@ def config_list():
 def chat():
     data=request.get_json()
     id=data.get("id")
-    prompt=data.get("prompt")
+    messages=data.get("messages")
     llm_config = configparser.ConfigParser()
     llm_config.read(f"./configs/{llm_configs[id]}")
+    messages.insert(0,{"role": "system", "content": llm_config['DEFAULT']['system']})
     response = client.chat.completions.create(
         model="deepseek-chat",
-        messages=[
-            {"role": "system", "content": llm_config['DEFAULT']['system']},
-            {"role": "user", "content": f"{prompt}"},
-        ],
+        messages=messages,
+        # messages=[
+        #     {"role": "system", "content": llm_config['DEFAULT']['system']},
+            
+        # ],
         stream=False,
         temperature=llm_config['DEFAULT']['temperature']
     )
@@ -61,4 +63,4 @@ def chat():
 
 if __name__ == '__main__':
     llm_configs_fresh()
-    app.run(debug=False,port=config['LOCAL']['port'])
+    app.run(debug=False,port=config['LOCAL']['port'],host="0.0.0.0")
